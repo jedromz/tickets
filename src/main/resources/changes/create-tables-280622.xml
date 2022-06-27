@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd
+    http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+    <changeSet id="280622-001" author="jedrek">
+        <createTable tableName="person">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="pesel" type="VARCHAR(255)"/>
+            <column name="firstname" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="lastname" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email" type="VARCHAR(255)"/>
+            <column name="version" type="BIGINT"/>
+            <column name="deleted" type="BOOLEAN"/>
+        </createTable>
+
+        <createTable tableName="ticket">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="date" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="offense" type="VARCHAR(255)"/>
+            <column name="points" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="charge" type="DECIMAL"/>
+            <column name="version" type="BIGINT"/>
+            <column name="deleted" type="BOOLEAN"/>
+            <column name="person_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="ticket" baseColumnNames="person_id" constraintName="fk_person_id"
+                                 referencedTableName="person"
+                                 referencedColumnNames="id" onDelete="CASCADE"
+                                 onUpdate="RESTRICT"/>
+        <rollback>
+            <dropTable tableName="ticket"/>
+            <dropTable tableName="person"/>
+        </rollback>
+    </changeSet>
+    <changeSet author="jedrek" id="280622-002">
+        <loadUpdateData
+                file="classpath:/changes/people.csv"
+                primaryKey="id"
+                schemaName="public"
+                quotchar='"'
+                separator=","
+                tableName="person">
+            <column name="id" type="BIGINT"/>
+            <column name="pesel" type="VARCHAR(255)"/>
+            <column name="firstname" type="VARCHAR(255)"/>
+            <column name="lastname" type="VARCHAR(255)"/>
+            <column name="email" type="VARCHAR(255)"/>
+            <column name="version" type="BIGINT"/>
+            <column name="deleted" type="BOOLEAN"/>
+        </loadUpdateData>
+        <loadUpdateData
+                file="classpath:/changes/tickets.csv"
+                primaryKey="id"
+                schemaName="public"
+                quotchar='"'
+                separator=","
+                tableName="ticket">
+            <column name="id" type="BIGINT"/>
+            <column name="date" type="DATE"/>
+            <column name="offense" type="VARCHAR(255)"/>
+            <column name="points" type="BIGINT"/>
+            <column name="charge" type="DECIMAL"/>
+            <column name="version" type="BIGINT"/>
+            <column name="deleted" type="BOOLEAN"/>
+            <column name="person_id" type="BIGINT"/>
+        </loadUpdateData>
+    </changeSet>
+
+</databaseChangeLog>
