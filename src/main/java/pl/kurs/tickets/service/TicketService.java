@@ -1,19 +1,17 @@
 package pl.kurs.tickets.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.kurs.tickets.error.EntityNotFoundException;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 import pl.kurs.tickets.model.Person;
 import pl.kurs.tickets.model.Ticket;
 import pl.kurs.tickets.model.command.CreateTicketCommand;
 import pl.kurs.tickets.model.command.UpdateTicketCommand;
 import pl.kurs.tickets.model.dto.NotificationEmail;
-import pl.kurs.tickets.model.dto.TicketDto;
 import pl.kurs.tickets.repository.PersonRepository;
 import pl.kurs.tickets.repository.TicketRepository;
 

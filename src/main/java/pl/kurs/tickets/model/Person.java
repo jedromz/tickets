@@ -1,10 +1,7 @@
 package pl.kurs.tickets.model;
 
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -15,7 +12,8 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"pesel"}, name = "UC_PERSON_PESEL")})
+@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"pesel"}, name = "UC_PERSON_PESEL"), @UniqueConstraint(columnNames = {"email"}, name = "UC_PERSON_EMAIL")})
+@EqualsAndHashCode(exclude = {"id", "tickets"})
 public class Person {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

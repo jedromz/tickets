@@ -41,6 +41,7 @@ public class PersonService {
         person.getTickets().forEach(p -> p.setDeleted(true));
     }
 
+    @Transactional
     public Person editById(Long id, UpdatePersonCommand command) throws EntityNotFoundException {
         Person person = getPersonById(id);
         person.setFirstname(command.getFirstname());
