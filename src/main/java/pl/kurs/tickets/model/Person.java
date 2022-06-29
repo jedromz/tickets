@@ -16,7 +16,8 @@ import java.util.List;
 @EqualsAndHashCode(exclude = {"id", "tickets"})
 public class Person {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hibernateSequence")
+    @SequenceGenerator(name = "hibernateSequence")
     private Long id;
     private String pesel;
     private String firstname;

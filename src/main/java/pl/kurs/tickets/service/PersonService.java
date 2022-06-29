@@ -22,6 +22,10 @@ public class PersonService {
         Person person = new Person(command.getPesel(), command.getFirstname(), command.getLastname(), command.getEmail());
         return personRepository.saveAndFlush(person);
     }
+    @Transactional
+    public Person savePerson(Person person) {
+        return personRepository.saveAndFlush(person);
+    }
 
     @Transactional(readOnly = true)
     public Person findPersonByPesel(String pesel) throws EntityNotFoundException {
@@ -52,6 +56,7 @@ public class PersonService {
         return person;
     }
 
+    @Transactional(readOnly = true)
     public Person getPersonById(Long id) throws EntityNotFoundException {
         return personRepository.findByIdWithTickets(id)
                 .orElseThrow(() -> new EntityNotFoundException("PERSON_ID", id.toString()));

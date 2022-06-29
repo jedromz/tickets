@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.kurs.tickets.error.EntityNotFoundException;
+import pl.kurs.tickets.error.TicketAlreadyExsitsException;
 import pl.kurs.tickets.model.Person;
 import pl.kurs.tickets.model.Ticket;
 import pl.kurs.tickets.model.command.CreateTicketCommand;
@@ -30,16 +31,20 @@ public class TicketService {
 
 
     @Transactional
-    public Ticket saveTicket(CreateTicketCommand command) throws EntityNotFoundException {
-        String pesel = command.getPesel();
-        Person person = personRepository.findByPeselWithTickets(pesel)
-                .orElseThrow(() -> new EntityNotFoundException("PERSON_PESEL", pesel));
-        Ticket ticket = new Ticket(command.getDate(), command.getOffense(), command.getPoints(), command.getCharge());
+    public Ticket saveTicket(CreateTicketCommand command) throws EntityNotFoundException, TicketAlreadyExsitsException {
+        Person person = personRepository.findByPeselWithTickets(command.getPesel())
+                .orElseThrow(() -> new EntityNotFoundException("PERSON_PESEL", command.getPesel()));
+        // prevent adding exactly the same tickets - pessimistic locking
+        if (ticketRepository.existsByPerson_PeselAndDateAndPointsAndChargeAndOffensesIn(command.getPesel(), command.getDate(), command.getPoints(), command.getCharge(), command.getOffenses())) {
+            throw new TicketAlreadyExsitsException();
+        }
+        Ticket ticket = new Ticket(command.getDate(), command.getPoints(), command.getCharge());
+        ticket.setOffenses(command.getOffenses());
         person.getTickets().add(ticket);
         ticket.setPerson(person);
         Ticket savedTicket = ticketRepository.saveAndFlush(ticket);
-        if (ticketRepository.sumPointsByPeselAndDateBetween(pesel, LocalDate.now().with(firstDayOfYear()), LocalDate.now().with(lastDayOfYear())) > 24) {
-            mailService.sendMail(new NotificationEmail());
+        if (ticketRepository.sumPointsByPeselAndDateBetween(command.getPesel(), LocalDate.now().with(firstDayOfYear()), LocalDate.now().with(lastDayOfYear())) > 24) {
+            mailService.sendMail(new NotificationEmail("polska@policja.com", command.getDate()+ " MANDAT" , person.getEmail(), ticket.toString()));
         }
         return savedTicket;
     }
@@ -68,7 +73,6 @@ public class TicketService {
         ticket.setDate(command.getDate());
         ticket.setCharge(command.getCharge());
         ticket.setPoints(command.getPoints());
-        ticket.setOffense(command.getOffense());
         ticket.setVersion(command.getVersion());
         return ticket;
     }

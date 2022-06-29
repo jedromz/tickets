@@ -5,19 +5,23 @@
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd
     http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
-    <changeSet id="280622-001" author="jedrek">
+    <changeSet id="280622-021" author="jedrek">
         <createTable tableName="person">
             <column autoIncrement="true" name="id" type="BIGINT">
                 <constraints primaryKey="true"/>
             </column>
-            <column name="pesel" type="VARCHAR(255)"/>
+            <column name="pesel" type="VARCHAR(255)">
+                <constraints unique="true" uniqueConstraintName="UC_PERSON_PESEL"/>
+            </column>
             <column name="firstname" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
             <column name="lastname" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="email" type="VARCHAR(255)"/>
+            <column name="email" type="VARCHAR(255)">
+                <constraints unique="true" uniqueConstraintName="UC_PERSON_EMAIL"/>
+            </column>
             <column name="version" type="BIGINT"/>
             <column name="deleted" type="BOOLEAN"/>
         </createTable>
@@ -29,7 +33,6 @@
             <column name="date" type="DATE">
                 <constraints nullable="false"/>
             </column>
-            <column name="offense" type="VARCHAR(255)"/>
             <column name="points" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
@@ -40,9 +43,17 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
-
+        <createTable tableName="ticket_offenses">
+            <column name="ticket_id" type="BIGINT">
+            </column>
+            <column name="offenses" type="VARCHAR(255)"/>
+        </createTable>
         <addForeignKeyConstraint baseTableName="ticket" baseColumnNames="person_id" constraintName="fk_person_id"
                                  referencedTableName="person"
+                                 referencedColumnNames="id" onDelete="CASCADE"
+                                 onUpdate="RESTRICT"/>
+        <addForeignKeyConstraint baseTableName="ticket_offenses" baseColumnNames="ticket_id" constraintName="fk_ticket_id"
+                                 referencedTableName="ticket"
                                  referencedColumnNames="id" onDelete="CASCADE"
                                  onUpdate="RESTRICT"/>
         <rollback>
@@ -50,7 +61,8 @@
             <dropTable tableName="person"/>
         </rollback>
     </changeSet>
-    <changeSet author="jedrek" id="280622-002">
+    <changeSet author="jedrek" id="280622-022">
+        <createSequence sequenceName="hibernate_sequence" startValue="1000" incrementBy="1"/>
         <loadUpdateData
                 file="classpath:/changes/people.csv"
                 primaryKey="id"

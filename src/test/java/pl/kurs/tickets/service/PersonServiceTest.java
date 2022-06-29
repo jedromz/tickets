@@ -16,7 +16,9 @@ import pl.kurs.tickets.repository.PersonRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -33,6 +35,7 @@ class PersonServiceTest {
     Person PERSON_1;
     Person PERSON_2;
     Person PERSON_3;
+    List<String> OFFENSES;
 
     @BeforeEach
     void setUp() {
@@ -41,6 +44,7 @@ class PersonServiceTest {
         PERSON_1 = new Person("64062278252", "TEST_FIRSTNAME", "TEST_LASTNAME", "test_1@email.com");
         PERSON_2 = new Person("00222295439", "TEST_FIRSTNAME", "TEST_LASTNAME", "test_2@email.com");
         PERSON_3 = new Person("83080442133", "TEST_FIRSTNAME", "TEST_LASTNAME", "test_3@email.com");
+        OFFENSES = new ArrayList<>(List.of("speeding", "drunk driving", "no seatbelt", "no license plate", "dangerous driving"));
     }
 
     @Test
@@ -78,7 +82,8 @@ class PersonServiceTest {
     void shouldDeleteById() {
         long id = 1L;
         Person TO_DELETE = new Person("83080442133", "TEST_FIRSTNAME", "TEST_LASTNAME", "test_3@email.com");
-        Ticket TICKET_TO_DELETE = new Ticket(LocalDate.now(), "TEST_OFFENSE", 5, BigDecimal.valueOf(1000));
+        Ticket TICKET_TO_DELETE = new Ticket(LocalDate.now(), 5, BigDecimal.valueOf(1000));
+        TICKET_TO_DELETE.setOffenses(OFFENSES);
         TO_DELETE.getTickets().add(TICKET_TO_DELETE);
         when(personRepository.findByIdWithTickets(any())).thenReturn(Optional.of(TO_DELETE));
         personService.deleteById(id);

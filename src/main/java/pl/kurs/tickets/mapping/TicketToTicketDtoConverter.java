@@ -20,7 +20,7 @@ public class TicketToTicketDtoConverter implements Converter<Ticket, TicketDto> 
                 .date(ticket.getDate())
                 .pesel(ticket.getPerson().getPesel())
                 .charge(ticket.getCharge())
-                .offense(ticket.getOffense())
+                .offenses(ticket.getOffenses())
                 .points(ticket.getPoints())
                 .build();
         ticketDto.add(linkTo(methodOn(PersonController.class).getPersonByPesel(ticket.getPerson().getPesel()))

@@ -14,26 +14,38 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(exclude = {"id", "person"})
+@EqualsAndHashCode(exclude = {"id"})
 public class Ticket {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hibernateSequence")
+    @SequenceGenerator(name = "hibernateSequence")
     private Long id;
     private LocalDate date;
-    private String offense;
+    @ElementCollection(fetch = FetchType.EAGER)
+    private List<String> offenses = new ArrayList<>();
     private Integer points;
     private BigDecimal charge;
     private boolean deleted;
     @Version
     private int version;
-    @ManyToOne
+    @ManyToOne()
     @JoinColumn(name = "person_id")
+
     private Person person;
 
-    public Ticket(LocalDate date, String offense, Integer points, BigDecimal charge) {
+    public Ticket(LocalDate date, Integer points, BigDecimal charge) {
         this.date = date;
-        this.offense = offense;
         this.points = points;
         this.charge = charge;
+    }
+
+    @Override
+    public String toString() {
+        return "Ticket{" +
+                "date=" + date +
+                ", offenses=" + offenses +
+                ", points=" + points +
+                ", charge=" + charge +
+                '}';
     }
 }

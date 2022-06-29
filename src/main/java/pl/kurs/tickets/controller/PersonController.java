@@ -54,7 +54,7 @@ public class PersonController {
     }
 
     @SneakyThrows
-    @GetMapping("/{pesel}")
+    @GetMapping("/pesel/{pesel}")
     public ResponseEntity<PersonDto> getPersonByPesel(@PathVariable String pesel) {
         Person person = personService.findPersonByPesel(pesel);
         return ResponseEntity.ok(modelMapper.map(person, PersonDto.class));
@@ -62,7 +62,7 @@ public class PersonController {
 
     @SneakyThrows
     @GetMapping("/{id}")
-    public ResponseEntity<PersonDto> getPersonByPesel(@PathVariable Long id) {
+    public ResponseEntity<PersonDto> getPersonById(@PathVariable Long id) {
         Person person = personService.getPersonById(id);
         return ResponseEntity.ok(modelMapper.map(person, PersonDto.class));
     }

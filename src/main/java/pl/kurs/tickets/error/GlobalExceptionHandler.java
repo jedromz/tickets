@@ -9,6 +9,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import pl.kurs.tickets.error.constraint.ConstraintErrorHandler;
+import pl.kurs.tickets.model.Ticket;
 
 import java.util.Map;
 import java.util.Set;
@@ -41,11 +42,16 @@ public class GlobalExceptionHandler {
     public ResponseEntity handleEntityNotFoundException(ObjectOptimisticLockingFailureException exc) {
         return new ResponseEntity(new OptimisticLockDto("OPTIMISTIC_LOCK"), HttpStatus.BAD_REQUEST);
     }
+    @ExceptionHandler(TicketAlreadyExsitsException.class)
+    public ResponseEntity handleEntityNotFoundException(TicketAlreadyExsitsException exc) {
+        return new ResponseEntity(new OptimisticLockDto("TICKET_EXISTS"), HttpStatus.BAD_REQUEST);
+    }
+
 
 
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity handleConstraintViolationException(ConstraintViolationException exc) {
-        String constraintName = exc.getConstraintName().substring(1, exc.getConstraintName().indexOf(" "));
+        String constraintName = exc.getConstraintName().split("_INDEX")[0].replaceAll("\"","");
         String message = constraintsMap.get(constraintName).message();
         String field = constraintsMap.get(constraintName).field();
         return new ResponseEntity(new ValidationErrorDto(message, field), HttpStatus.BAD_REQUEST);

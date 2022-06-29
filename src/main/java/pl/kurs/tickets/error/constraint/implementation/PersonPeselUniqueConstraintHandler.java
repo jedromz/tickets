@@ -7,12 +7,12 @@ import pl.kurs.tickets.error.constraint.ConstraintErrorHandler;
 public class PersonPeselUniqueConstraintHandler implements ConstraintErrorHandler {
     @Override
     public String constraintName() {
-        return "UC_PERSON_NIP";
+        return "PUBLIC.UC_PERSON_PESEL";
     }
 
     @Override
     public String message() {
-        return "NIP_NOT_UNIQUE";
+        return "PESEL_NOT_UNIQUE";
     }
 
     @Override

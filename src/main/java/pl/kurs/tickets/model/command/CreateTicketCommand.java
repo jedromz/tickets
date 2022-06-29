@@ -9,6 +9,7 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
@@ -21,8 +22,7 @@ public class CreateTicketCommand {
     @NotNull(message = "DATE_NOT_NULL")
     private LocalDate date;
     @NotNull(message = "OFFENSE_NOT_NULL")
-    @Length(max = 1000,message = "LENGTH_MAX_1000")
-    private String offense;
+    private List<String> offenses;
     @Max(15)
     @NotNull(message = "POINTS_NOT_NULL")
     private Integer points;

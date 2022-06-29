@@ -1,9 +1,9 @@
 package pl.kurs.tickets.service;
 
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -15,10 +15,11 @@ import pl.kurs.tickets.model.command.UpdateTicketCommand;
 import pl.kurs.tickets.repository.PersonRepository;
 import pl.kurs.tickets.repository.TicketRepository;
 
-import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -38,22 +39,26 @@ class TicketServiceTest {
     Ticket TICKET_1;
     Ticket TICKET_2;
     Ticket TICKET_3;
+    List<String> OFFENSES;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
         ticketService = new TicketService(ticketRepository, personRepository, mailService);
         PERSON_1 = new Person("00231048459", "TEST_FIRSTNAME", "TEST_LASTNAME", "test@mail.com");
-        TICKET_1 = new Ticket(LocalDate.now(), "TEST_OFFENSE", 5, BigDecimal.valueOf(1000));
-        TICKET_2 = new Ticket(LocalDate.now(), "TEST_OFFENSE", 10, BigDecimal.valueOf(2000));
-        TICKET_3 = new Ticket(LocalDate.now(), "TEST_OFFENSE", 15, BigDecimal.valueOf(3000));
+        OFFENSES = new ArrayList<>(List.of("speeding", "drunk driving", "no seatbelt", "no license plate", "dangerous driving"));
+        TICKET_1 = new Ticket(LocalDate.now(), 5, BigDecimal.valueOf(1000));
+        TICKET_2 = new Ticket(LocalDate.now(), 10, BigDecimal.valueOf(2000));
+        TICKET_3 = new Ticket(LocalDate.now(), 15, BigDecimal.valueOf(3000));
+        TICKET_1.setOffenses(OFFENSES);
     }
 
+    @SneakyThrows
     @Test
     void shouldSaveTicket() {
         CreateTicketCommand command = CreateTicketCommand.builder()
                 .date(TICKET_1.getDate())
-                .offense(TICKET_1.getOffense())
+                .offenses(TICKET_1.getOffenses())
                 .charge(TICKET_1.getCharge())
                 .pesel(PERSON_1.getPesel())
                 .points(TICKET_1.getPoints())
@@ -75,9 +80,10 @@ class TicketServiceTest {
 
     @Test
     void shouldDeleteById() {
-        Ticket TO_DELETE = new Ticket(LocalDate.now(), "TEST_OFFENSE", 15, BigDecimal.valueOf(3000));
+        Ticket TO_DELETE = new Ticket(LocalDate.now(), 15, BigDecimal.valueOf(3000));
+        TO_DELETE.setOffenses(OFFENSES);
         when(ticketRepository.findById(any())).thenReturn(Optional.of(TO_DELETE));
-        ticketService.deleteById(1L);
+        ticketService.deleteById(anyLong());
         assertTrue(TO_DELETE.isDeleted());
         verify(ticketRepository).findById(any());
     }
@@ -93,13 +99,11 @@ class TicketServiceTest {
     @Test
     void updateTicket() {
         LocalDate updatedDate = LocalDate.now().plusDays(30);
-        String updatedOffense = "UPDATED_OFFENSE";
         BigDecimal updatedCharge = BigDecimal.valueOf(100);
         int updatedPoints = 0;
         int updatedVersion = TICKET_1.getVersion() + 1;
         UpdateTicketCommand command = UpdateTicketCommand.builder()
                 .date(updatedDate)
-                .offense(updatedOffense)
                 .charge(updatedCharge)
                 .points(updatedPoints)
                 .version(updatedVersion)
@@ -108,9 +112,7 @@ class TicketServiceTest {
         Ticket updatedTicket = ticketService.updateTicket(1L, command);
         verify(ticketRepository).findById(any());
         assertEquals(updatedTicket.getDate(), updatedDate);
-        assertEquals(updatedTicket.getOffense(), updatedOffense);
         assertEquals(updatedTicket.getCharge(), updatedCharge);
         assertEquals(updatedTicket.getPoints(), updatedPoints);
     }
-
 }

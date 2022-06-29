@@ -29,7 +29,7 @@ public class TicketController {
     @SneakyThrows
     public ResponseEntity<TicketDto> postTicket(@RequestBody @Valid CreateTicketCommand command) {
         Ticket ticket = ticketService.saveTicket(command);
-        return ResponseEntity.ok(modelMapper.map(ticket, TicketDto.class));
+        return new ResponseEntity<>(modelMapper.map(ticket, TicketDto.class),HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
