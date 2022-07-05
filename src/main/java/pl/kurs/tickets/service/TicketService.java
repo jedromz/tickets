@@ -7,12 +7,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.kurs.tickets.error.EntityNotFoundException;
-import pl.kurs.tickets.error.TicketAlreadyExsitsException;
+import pl.kurs.tickets.model.Offense;
+import pl.kurs.tickets.model.OffenseDictionary;
 import pl.kurs.tickets.model.Person;
 import pl.kurs.tickets.model.Ticket;
+import pl.kurs.tickets.model.command.AddOffenseCommand;
 import pl.kurs.tickets.model.command.CreateTicketCommand;
-import pl.kurs.tickets.model.command.UpdateTicketCommand;
 import pl.kurs.tickets.model.dto.NotificationEmail;
+import pl.kurs.tickets.repository.OffenseDictionaryRepository;
+import pl.kurs.tickets.repository.OffenseRepository;
 import pl.kurs.tickets.repository.PersonRepository;
 import pl.kurs.tickets.repository.TicketRepository;
 
@@ -27,26 +30,41 @@ import static java.time.temporal.TemporalAdjusters.lastDayOfYear;
 public class TicketService {
     private final TicketRepository ticketRepository;
     private final PersonRepository personRepository;
+    private final OffenseRepository offenseRepository;
+    private final OffenseDictionaryRepository offenseDictionaryRepository;
     private final MailService mailService;
 
-
     @Transactional
-    public Ticket saveTicket(CreateTicketCommand command) throws EntityNotFoundException, TicketAlreadyExsitsException {
-        Person person = personRepository.findByPeselWithTickets(command.getPesel())
-                .orElseThrow(() -> new EntityNotFoundException("PERSON_PESEL", command.getPesel()));
-        // prevent adding exactly the same tickets - pessimistic locking
-        if (ticketRepository.existsByPerson_PeselAndDateAndPointsAndChargeAndOffensesIn(command.getPesel(), command.getDate(), command.getPoints(), command.getCharge(), command.getOffenses())) {
-            throw new TicketAlreadyExsitsException();
-        }
-        Ticket ticket = new Ticket(command.getDate(), command.getPoints(), command.getCharge());
-        ticket.setOffenses(command.getOffenses());
+    public Ticket saveTicket(CreateTicketCommand command) {
+        Person person = getPersonByPesel(command);
+        Ticket ticket = new Ticket(command.getDate());
         person.getTickets().add(ticket);
         ticket.setPerson(person);
-        Ticket savedTicket = ticketRepository.saveAndFlush(ticket);
-        if (ticketRepository.sumPointsByPeselAndDateBetween(command.getPesel(), LocalDate.now().with(firstDayOfYear()), LocalDate.now().with(lastDayOfYear())) > 24) {
-            mailService.sendMail(new NotificationEmail("polska@policja.com", command.getDate()+ " MANDAT" , person.getEmail(), ticket.toString()));
+        for (AddOffenseCommand offenseCommand : command.getOffenses()) {
+            OffenseDictionary offenseDictEntry = getOffenseDictEntryByName(offenseCommand.getName());
+            Offense offense = new Offense(offenseCommand.getCharge());
+            offense.setOffenseDictionary(offenseDictEntry);
+            ticket.getOffenses().add(offense);
+            offense.setTicket(ticket);
         }
-        return savedTicket;
+        if (sumPointsByPeselAndDateBetween(person.getPesel(), LocalDate.now().with(firstDayOfYear()), LocalDate.now().with(lastDayOfYear())) > 24) {
+            mailService.sendMail(new NotificationEmail("polska@policja.com", "mandat", person.getEmail(), "mandat elo"));
+        }
+        return ticketRepository.saveAndFlush(ticket);
+    }
+
+    private Integer sumPointsByPeselAndDateBetween(String pesel, LocalDate start, LocalDate end) {
+        return ticketRepository.sumPointsByPeselAndDateBetween(pesel, start, end);
+    }
+
+    private OffenseDictionary getOffenseDictEntryByName(String name) {
+        return offenseDictionaryRepository.findByName(name)
+                .orElseThrow(() -> new EntityNotFoundException("OFFENSE_DICT_NAME", name));
+    }
+
+    private Person getPersonByPesel(CreateTicketCommand command) {
+        return personRepository.findByPeselWithTickets(command.getPesel())
+                .orElseThrow(() -> new EntityNotFoundException("PERSON_PESEL", command.getPesel()));
     }
 
     @Transactional(readOnly = true)
@@ -58,22 +76,12 @@ public class TicketService {
     public void deleteById(Long id) throws EntityNotFoundException {
         Ticket ticket = ticketRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("TICKET_ID", id.toString()));
+        ticket.getOffenses().forEach(o -> o.setDeleted(true));
         ticket.setDeleted(true);
     }
 
     @Transactional(readOnly = true)
     public Page<Ticket> findAll(Pageable pageable) {
         return ticketRepository.findAll(pageable);
-    }
-
-    @Transactional
-    public Ticket updateTicket(Long id, UpdateTicketCommand command) throws EntityNotFoundException {
-        Ticket ticket = ticketRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("TICKET_ID", id.toString()));
-        ticket.setDate(command.getDate());
-        ticket.setCharge(command.getCharge());
-        ticket.setPoints(command.getPoints());
-        ticket.setVersion(command.getVersion());
-        return ticket;
     }
 }

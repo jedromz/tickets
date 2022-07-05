@@ -5,7 +5,9 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -24,10 +26,10 @@ public class Person {
     private String lastname;
     private String email;
     private boolean deleted;
+    @OneToMany(mappedBy = "person", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private Set<Ticket> tickets = new HashSet<>();
     @Version
     private int version;
-    @OneToMany(mappedBy = "person")
-    private List<Ticket> tickets = new ArrayList<>();
 
     public Person(String pesel, String firstname, String lastname, String email) {
         this.pesel = pesel;

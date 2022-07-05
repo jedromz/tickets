@@ -16,13 +16,12 @@ public class UpdatePersonCommand {
     @PESEL
     @NotNull(message = "PESEL_NOT_NULL")
     private String pesel;
-    @Length(max = 200)
+    @Length(max = 200,message = "FIRSTNAME_MAX_LENGTH_200")
     @NotNull(message = "FIRSTNAME_NOT_NULL")
     private String firstname;
-    @Length(max = 200)
+    @Length(max = 200,message = "LASTNAME_MAX_LENGTH_200")
     @NotNull(message = "LASTNAME_NOT_NULL")
     private String lastname;
-    @Length(max = 200)
     @NotNull(message = "EMAIL_NOT_NULL")
     @Email
     private String email;

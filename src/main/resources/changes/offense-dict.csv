@@ -1,0 +1,6 @@
+id,name,points,min_charge,max_charge,deleted,version
+1,speeding,10,100,3000,0,0
+2,drunk driving,15,100,4000,0,0
+3,dangerous driving,5,100,5000,0,0
+4,no seatbelt,5,0,3000,0,0
+5,causing a collision,10,1000,5000,0,0

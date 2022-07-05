@@ -12,14 +12,16 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
 
-public interface TicketRepository extends JpaRepository<Ticket,Long> {
+public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
-    @Query("select sum(t.points) from Ticket t where  t.person.pesel = ?1 and t.date between ?2 and ?3 and t.deleted = false")
-    Integer sumPointsByPeselAndDateBetween(String pesel, LocalDate dateStart, LocalDate dateEnd);
-
+//    left join fetch o.ticket t where t.person.pesel = ?1 and t.date between ?2 and ?3 and t.deleted = false
+    @Query("select sum(od.points) from Offense o join o.offenseDictionary od  join  o.ticket t where t.person.pesel = ?1 and t.date between ?2 and ?3 and t.deleted = false ")
+    Integer sumPointsByPeselAndDateBetween(String pesel,LocalDate dateStart, LocalDate dateEnd);
+//
+    @Query("select t from Ticket t left join fetch Offense o where t.person.pesel = ?1")
     Page<Ticket> findByPerson_Pesel(String pesel, Pageable pageable);
-    @Lock(LockModeType.PESSIMISTIC_READ)
-    boolean existsByPerson_PeselAndDateAndPointsAndChargeAndOffensesIn(String pesel, LocalDate date, Integer points, BigDecimal charge, Collection<String> offenses);
+//    //@Lock(LockModeType.PESSIMISTIC_READ)
+//    //boolean existsByPerson_PeselAndDateAndPointsAndChargeAndOffensesIn(String pesel, LocalDate date, Integer points, BigDecimal charge, Collection<String> offenses);
 
 
 }

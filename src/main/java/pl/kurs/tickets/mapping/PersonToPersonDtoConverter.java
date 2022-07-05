@@ -23,9 +23,9 @@ public class PersonToPersonDtoConverter implements Converter<Person, PersonDto> 
                 .lastname(person.getLastname())
                 .email(person.getEmail())
                 .pesel(person.getPesel())
+                .version(person.getVersion())
+                .deleted(person.isDeleted())
                 .build();
-        personDto.add(linkTo(methodOn(TicketController.class).getAllTicketsByPesel(Pageable.unpaged(), person.getPesel()))
-                .withRel("person-details"));
         return personDto;
     }
 }

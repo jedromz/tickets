@@ -1,13 +1,11 @@
 package pl.kurs.tickets.controller;
 
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,7 +13,6 @@ import pl.kurs.tickets.model.Person;
 import pl.kurs.tickets.model.command.CreatePersonCommand;
 import pl.kurs.tickets.model.command.UpdatePersonCommand;
 import pl.kurs.tickets.model.dto.PersonDto;
-import pl.kurs.tickets.model.dto.TicketDto;
 import pl.kurs.tickets.service.PersonService;
 
 import javax.validation.Valid;
@@ -42,7 +39,7 @@ public class PersonController {
     @SneakyThrows
     @DeleteMapping("/{id}")
     public ResponseEntity deletePersonById(@PathVariable Long id) {
-        personService.deleteById(id);
+        personService.softDeleteById(id);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 

@@ -11,8 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.kurs.tickets.model.Ticket;
 import pl.kurs.tickets.model.command.CreateTicketCommand;
-import pl.kurs.tickets.model.command.UpdateTicketCommand;
-import pl.kurs.tickets.model.dto.PersonDto;
 import pl.kurs.tickets.model.dto.TicketDto;
 import pl.kurs.tickets.service.TicketService;
 
@@ -29,14 +27,7 @@ public class TicketController {
     @SneakyThrows
     public ResponseEntity<TicketDto> postTicket(@RequestBody @Valid CreateTicketCommand command) {
         Ticket ticket = ticketService.saveTicket(command);
-        return new ResponseEntity<>(modelMapper.map(ticket, TicketDto.class),HttpStatus.CREATED);
-    }
-
-    @PutMapping("/{id}")
-    @SneakyThrows
-    public ResponseEntity<TicketDto> putTicket(@PathVariable Long id, @RequestBody @Valid UpdateTicketCommand command) {
-        Ticket ticket = ticketService.updateTicket(id, command);
-        return ResponseEntity.ok(modelMapper.map(ticket, TicketDto.class));
+        return new ResponseEntity<>(modelMapper.map(ticket, TicketDto.class), HttpStatus.CREATED);
     }
 
     @GetMapping("/{pesel}")

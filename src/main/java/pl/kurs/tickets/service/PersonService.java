@@ -16,12 +16,14 @@ import pl.kurs.tickets.repository.PersonRepository;
 @RequiredArgsConstructor
 public class PersonService {
     private final PersonRepository personRepository;
+    private final TicketService ticketService;
 
     @Transactional
     public Person savePerson(CreatePersonCommand command) {
         Person person = new Person(command.getPesel(), command.getFirstname(), command.getLastname(), command.getEmail());
         return personRepository.saveAndFlush(person);
     }
+
     @Transactional
     public Person savePerson(Person person) {
         return personRepository.saveAndFlush(person);
@@ -39,10 +41,10 @@ public class PersonService {
     }
 
     @Transactional
-    public void deleteById(Long id) throws EntityNotFoundException {
+    public void softDeleteById(Long id) throws EntityNotFoundException {
         Person person = getPersonById(id);
         person.setDeleted(true);
-        person.getTickets().forEach(p -> p.setDeleted(true));
+        person.getTickets().forEach(t -> ticketService.deleteById(t.getId()));
     }
 
     @Transactional
@@ -60,5 +62,20 @@ public class PersonService {
     public Person getPersonById(Long id) throws EntityNotFoundException {
         return personRepository.findByIdWithTickets(id)
                 .orElseThrow(() -> new EntityNotFoundException("PERSON_ID", id.toString()));
+    }
+
+    public boolean existsByEmail(String email) {
+        return personRepository.existsByEmail(email);
+    }
+
+    public boolean existsByPesel(String pesel) {
+        return personRepository.existsByPesel(pesel);
+    }
+
+    public void deletePerson(Person person) {
+        personRepository.delete(person);
+    }
+    public void deletePersonById(Long id){
+        personRepository.deleteById(id);
     }
 }
