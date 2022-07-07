@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import pl.kurs.tickets.error.EntityNotFoundException;
 import pl.kurs.tickets.model.Person;
 import pl.kurs.tickets.model.command.CreatePersonCommand;
+import pl.kurs.tickets.model.searchcriteria.PersonSearchCriteria;
 import pl.kurs.tickets.model.command.UpdatePersonCommand;
 import pl.kurs.tickets.repository.PersonRepository;
 
@@ -24,13 +25,14 @@ public class PersonService {
         return personRepository.saveAndFlush(person);
     }
 
+
     @Transactional
     public Person savePerson(Person person) {
         return personRepository.saveAndFlush(person);
     }
 
     @Transactional(readOnly = true)
-    public Person findPersonByPesel(String pesel) throws EntityNotFoundException {
+    public Person getPersonByPesel(String pesel) throws EntityNotFoundException {
         return personRepository.findByPeselWithTickets(pesel)
                 .orElseThrow(() -> new EntityNotFoundException("PERSON_PESEL", pesel));
     }
@@ -75,7 +77,13 @@ public class PersonService {
     public void deletePerson(Person person) {
         personRepository.delete(person);
     }
-    public void deletePersonById(Long id){
+
+    public void deletePersonById(Long id) {
         personRepository.deleteById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Person> findAllByCriteria(Pageable pageable, PersonSearchCriteria criteria) {
+        return personRepository.findAll(criteria.toPredicate(), pageable);
     }
 }

@@ -12,9 +12,10 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"name"}, name = "UC_OFFENSE_NAME")})
+@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"name"}, name = "UC_OFFENSE_DICT_NAME")})
 @EqualsAndHashCode(exclude = {"id"})
 public class OffenseDictionary {
+
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hibernateSequence")
     @SequenceGenerator(name = "hibernateSequence")

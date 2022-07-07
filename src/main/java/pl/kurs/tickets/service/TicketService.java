@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.kurs.tickets.error.EntityNotFoundException;
@@ -14,6 +15,9 @@ import pl.kurs.tickets.model.Ticket;
 import pl.kurs.tickets.model.command.AddOffenseCommand;
 import pl.kurs.tickets.model.command.CreateTicketCommand;
 import pl.kurs.tickets.model.dto.NotificationEmail;
+import pl.kurs.tickets.model.dto.TicketDto;
+import pl.kurs.tickets.model.searchcriteria.PersonSearchCriteria;
+import pl.kurs.tickets.model.searchcriteria.TicketSearchCriteria;
 import pl.kurs.tickets.repository.OffenseDictionaryRepository;
 import pl.kurs.tickets.repository.OffenseRepository;
 import pl.kurs.tickets.repository.PersonRepository;
@@ -76,12 +80,34 @@ public class TicketService {
     public void deleteById(Long id) throws EntityNotFoundException {
         Ticket ticket = ticketRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("TICKET_ID", id.toString()));
-        ticket.getOffenses().forEach(o -> o.setDeleted(true));
         ticket.setDeleted(true);
+        ticket.getOffenses().forEach(o -> o.setDeleted(true));
     }
 
     @Transactional(readOnly = true)
     public Page<Ticket> findAll(Pageable pageable) {
         return ticketRepository.findAll(pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Ticket> findAllByCriteria(Pageable pageable, TicketSearchCriteria criteria) {
+        return ticketRepository.findAll(criteria.toPredicate(), pageable);
+    }
+
+    public Page<Offense> getOffensesById(Pageable pageable, Long id) {
+        return offenseRepository.findByTicket_Id(id, pageable);
+    }
+
+    public Ticket getTicketById(Long id) {
+        return ticketRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("TICKET_ID", Long.toString(id)));
+    }
+
+    @Transactional
+    public Ticket saveTicket(Ticket ticket) {
+        return ticketRepository.saveAndFlush(ticket);
+    }
+    public void deleteTicket(Ticket ticket){
+        ticketRepository.delete(ticket);
     }
 }

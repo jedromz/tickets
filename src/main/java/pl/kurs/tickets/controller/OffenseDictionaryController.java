@@ -21,10 +21,10 @@ public class OffenseDictionaryController {
     private final ModelMapper modelMapper;
 
     @PostMapping
-    public ResponseEntity<OffenseDictionaryDto> postOffenseDictionaryEntry(@Valid CreateOffenseDictionaryEntryCommand command) {
+    public ResponseEntity<OffenseDictionaryDto> postOffenseDictionaryEntry(@RequestBody @Valid CreateOffenseDictionaryEntryCommand command) {
         OffenseDictionary entry = offenseDictionaryService.saveEntry(command);
         OffenseDictionaryDto dto = modelMapper.map(entry, OffenseDictionaryDto.class);
-        return ResponseEntity.ok(dto);
+        return new ResponseEntity<>(dto, HttpStatus.CREATED);
     }
 
     @DeleteMapping("/{name}")

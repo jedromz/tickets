@@ -51,4 +51,9 @@ public class OffenseDictionaryService {
         offenseDictionary.setPoints(command.getPoints());
         return offenseDictionary;
     }
+
+    @Transactional
+    public OffenseDictionary saveEntry(OffenseDictionary offenseDictionary) {
+        return offenseDictionaryRepository.saveAndFlush(offenseDictionary);
+    }
 }

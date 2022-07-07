@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.kurs.tickets.model.Person;
 import pl.kurs.tickets.model.command.CreatePersonCommand;
+import pl.kurs.tickets.model.searchcriteria.PersonSearchCriteria;
 import pl.kurs.tickets.model.command.UpdatePersonCommand;
 import pl.kurs.tickets.model.dto.PersonDto;
 import pl.kurs.tickets.service.PersonService;
@@ -51,16 +52,15 @@ public class PersonController {
     }
 
     @SneakyThrows
-    @GetMapping("/pesel/{pesel}")
-    public ResponseEntity<PersonDto> getPersonByPesel(@PathVariable String pesel) {
-        Person person = personService.findPersonByPesel(pesel);
-        return ResponseEntity.ok(modelMapper.map(person, PersonDto.class));
-    }
-
-    @SneakyThrows
     @GetMapping("/{id}")
     public ResponseEntity<PersonDto> getPersonById(@PathVariable Long id) {
         Person person = personService.getPersonById(id);
         return ResponseEntity.ok(modelMapper.map(person, PersonDto.class));
+    }
+
+    @PostMapping("/search")
+    public ResponseEntity<Page<PersonDto>> searchPeople(@PageableDefault Pageable pageable, @RequestBody PersonSearchCriteria criteria) {
+        Page<Person> peopleByCriteria = personService.findAllByCriteria(pageable, criteria);
+        return ResponseEntity.ok(peopleByCriteria.map(p -> modelMapper.map(p, PersonDto.class)));
     }
 }

@@ -2,22 +2,20 @@ package pl.kurs.tickets.model.dto;
 
 import lombok.*;
 import org.springframework.hateoas.RepresentationModel;
+import pl.kurs.tickets.model.OffenseDictionary;
+import pl.kurs.tickets.model.Ticket;
 
-import javax.persistence.Version;
+import javax.persistence.*;
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Set;
-
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class TicketDto extends RepresentationModel<TicketDto> {
+public class OffenseDto extends RepresentationModel<OffenseDto> {
+
     private Long id;
-    private LocalDate date;
-    private String pesel;
+    private BigDecimal charge;
     private boolean deleted;
     private int version;
 }
